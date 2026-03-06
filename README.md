@@ -1,103 +1,118 @@
 # Claude Code Status Line
 
-A custom status line for [Claude Code](https://claude.com/claude-code) that displays model info, token usage, rate limits, and reset times in a single compact line. It runs as an external shell command, so it does not slow down Claude Code or consume any extra tokens.
+A cross-platform Python status line for [Claude Code](https://claude.com/claude-code) that displays model info, token usage, rate limits, and reset times. Two display modes: **minimal** (numbers only) and **visual** (progress bars with pacing markers). Runs as an external command — no extra tokens consumed.
 
-## Screenshot
-
-![Status Line Screenshot](screenshot.png)
+> Forked from [daniel3303/ClaudeCodeStatusLine](https://github.com/daniel3303/ClaudeCodeStatusLine) by [Daniel Oliveira](https://danielapoliveira.com/). Rewritten from dual bash/PowerShell into a single Python script.
 
 ## What it shows
 
-| Segment | Description |
-|---------|-------------|
-| **Model** | Current model name (e.g., Opus 4.6) |
-| **CWD@Branch** | Current folder name, git branch, and file changes (+/-) |
-| **Tokens** | Used / total context window tokens (% used) |
-| **Effort** | Reasoning effort level (low, med, high) |
-| **5h** | 5-hour rate limit usage percentage and reset time |
-| **7d** | 7-day rate limit usage percentage and reset time |
-| **Extra** | Extra usage credits spent / limit (if enabled) |
+| Segment | Minimal | Visual |
+|---------|---------|--------|
+| **Model** | Colour-coded by family (Opus=blue, Sonnet=orange, Haiku=purple) | Same |
+| **CWD@Branch** | `folder@branch +N -M` | Same |
+| **Context** | `50k/200k (25%)` colour-coded % | `[##--------] 25% 50k/200k` with RAG thresholds |
+| **Effort** | `effort: high` colour-coded | Same |
+| **5h usage** | `5h 37% @11pm` | `5h [####|-----] 37% @11pm` with pacing marker |
+| **7d usage** | `7d 26% @thu 10am` | `7d [###|------] 26% @thu 10am` with pacing marker |
+| **Extra** | `extra $1.50/$5.00` colour-coded | Same |
 
-Usage percentages are color-coded: green (<50%) → yellow (≥50%) → orange (≥70%) → red (≥90%).
+### Colour thresholds
+
+| Element | Green | Yellow | Orange | Red |
+|---------|-------|--------|--------|-----|
+| Context % (minimal) | <50% | >=50% | >=70% | >=90% |
+| Context bar (visual) | tok <100k | -- | tok 100-128k | tok >=128k |
+| Usage % (5h/7d) | <50% | >=50% | >=70% | >=90% |
+| Effort level | high | -- | med | low (dim) |
+| Model name | Per-family: Opus=blue, Sonnet=orange, Haiku=purple, other=cyan |
+
+### Pacing markers
+
+In visual mode, the 5h and 7d bars include a `|` marker showing where you *should* be based on elapsed time in the window. If your filled bar is ahead of the marker, you're using faster than the steady-state pace.
 
 ## Requirements
 
-### macOS / Linux
-
-- `jq` — for JSON parsing
-- `curl` — for fetching usage data from the Anthropic API
-- Claude Code with OAuth authentication (Pro/Max subscription)
-
-### Windows
-
-- PowerShell 7+ (for ANSI escape support)
+- Python 3.7+
 - `git` in PATH (for branch/diff info)
 - Claude Code with OAuth authentication (Pro/Max subscription)
 
+No external dependencies — uses only the Python standard library.
+
 ## Installation
 
-### Quick setup (recommended)
+### Quick setup
 
-Copy the contents of `statusline.sh` (or `statusline.ps1` on Windows) and paste it into Claude Code with the prompt:
+Copy `statusline.py` and paste it into Claude Code with the prompt:
 
 > Use this script as my status bar
 
-Claude Code will save the script and configure `settings.json` for you automatically.
+Claude Code will save the script and configure `settings.json` for you.
 
-### Manual setup — macOS / Linux
+### Manual setup (all platforms)
 
-1. Copy the script to your Claude config directory:
+1. Copy the script:
 
    ```bash
-   cp statusline.sh ~/.claude/statusline.sh
-   chmod +x ~/.claude/statusline.sh
+   # macOS / Linux
+   cp statusline.py ~/.claude/statusline.py
+
+   # Windows (PowerShell)
+   Copy-Item statusline.py "$env:USERPROFILE\.claude\statusline.py"
    ```
 
-2. Add the status line config to `~/.claude/settings.json`:
+2. Add to `~/.claude/settings.json`:
 
    ```json
    {
      "statusLine": {
        "type": "command",
-       "command": "~/.claude/statusline.sh"
+       "command": "python ~/.claude/statusline.py"
+     }
+   }
+   ```
+
+   For minimal mode:
+
+   ```json
+   {
+     "statusLine": {
+       "type": "command",
+       "command": "python ~/.claude/statusline.py --mode minimal"
+     }
+   }
+   ```
+
+   On Windows, use the full path:
+
+   ```json
+   {
+     "statusLine": {
+       "type": "command",
+       "command": "python \"%USERPROFILE%\\.claude\\statusline.py\""
      }
    }
    ```
 
 3. Restart Claude Code.
 
-### Manual setup — Windows
+## Credential resolution
 
-> **Windows users should use `statusline.ps1`** instead of the bash script.
+The script looks for your OAuth token in this order:
 
-1. Copy the script to your Claude config directory:
-
-   ```powershell
-   Copy-Item statusline.ps1 "$env:USERPROFILE\.claude\statusline.ps1"
-   ```
-
-2. Add the status line config to `%USERPROFILE%\.claude\settings.json`:
-
-   ```json
-   {
-     "statusLine": {
-       "type": "command",
-       "command": "pwsh -NoProfile -File \"%USERPROFILE%\\.claude\\statusline.ps1\""
-     }
-   }
-   ```
-
-3. Restart Claude Code.
+1. `CLAUDE_CODE_OAUTH_TOKEN` environment variable
+2. macOS Keychain (`security find-generic-password`)
+3. Credentials file (`~/.claude/.credentials.json` or `%LOCALAPPDATA%/Claude Code/credentials.json`)
+4. GNOME Keyring (`secret-tool lookup`)
 
 ## Caching
 
-Usage data from the Anthropic API is cached for 60 seconds at `/tmp/claude/statusline-usage-cache.json` to avoid excessive API calls.
+Usage API data is cached for 60 seconds in a platform-appropriate temp directory. Falls back to stale cache if the API call fails.
 
 ## License
 
 MIT
 
-## Author
+## Original author
 
 Daniel Oliveira
 
