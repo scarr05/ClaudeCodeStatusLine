@@ -10,10 +10,10 @@ A cross-platform Python status line for [Claude Code](https://claude.com/claude-
 |---------|---------|--------|
 | **Model** | Colour-coded by family (Opus=blue, Sonnet=orange, Haiku=purple) | Same |
 | **CWD@Branch** | `folder@branch +N -M` | Same |
-| **Context** | `50k/200k (25%)` colour-coded % | `[##--------] 25% 50k/200k` with RAG thresholds |
+| **Context** | `50k/200k (25%)` colour-coded % | `▓▓░░░░░░░░ 25% 50k/200k` with RAG thresholds |
 | **Effort** | `effort: high` colour-coded | Same |
-| **5h usage** | `5h 37% @11pm` | `5h [####|-----] 37% @11pm` with pacing marker |
-| **7d usage** | `7d 26% @thu 10am` | `7d [###|------] 26% @thu 10am` with pacing marker |
+| **5h usage** | `5h 37% @11pm` | `5h ▓▓▓▓│░░░░░ 37% @11pm` with pacing marker |
+| **7d usage** | `7d 26% @thu 10am` | `7d ▓▓▓│░░░░░░ 26% @thu 10am` with pacing marker |
 | **Extra** | `extra $1.50/$5.00` colour-coded | Same |
 
 ### Colour thresholds
@@ -28,7 +28,7 @@ A cross-platform Python status line for [Claude Code](https://claude.com/claude-
 
 ### Pacing markers
 
-In visual mode, the 5h and 7d bars include a `|` marker showing where you *should* be based on elapsed time in the window. If your filled bar is ahead of the marker, you're using faster than the steady-state pace.
+In visual mode, the 5h and 7d bars include a `│` marker showing where you *should* be based on elapsed time in the window. If your filled bar is ahead of the marker, you're using faster than the steady-state pace.
 
 ## Requirements
 
@@ -66,7 +66,7 @@ Claude Code will save the script and configure `settings.json` for you.
    {
      "statusLine": {
        "type": "command",
-       "command": "python ~/.claude/statusline.py"
+       "command": "python3 ~/.claude/statusline.py"
      }
    }
    ```
@@ -77,12 +77,12 @@ Claude Code will save the script and configure `settings.json` for you.
    {
      "statusLine": {
        "type": "command",
-       "command": "python ~/.claude/statusline.py --mode minimal"
+       "command": "python3 ~/.claude/statusline.py --mode minimal"
      }
    }
    ```
 
-   On Windows, use the full path:
+   On Windows, use the full path with `python` (not `python3`):
 
    ```json
    {
@@ -92,6 +92,8 @@ Claude Code will save the script and configure `settings.json` for you.
      }
    }
    ```
+
+   > **Note:** On Linux/WSL, use `python3` as most distributions don't include a `python` symlink. On macOS/Windows, `python` typically works.
 
 3. Restart Claude Code.
 
