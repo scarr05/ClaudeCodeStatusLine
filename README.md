@@ -4,6 +4,14 @@ A cross-platform Python status line for [Claude Code](https://claude.com/claude-
 
 > Forked from [daniel3303/ClaudeCodeStatusLine](https://github.com/daniel3303/ClaudeCodeStatusLine) by [Daniel Oliveira](https://danielapoliveira.com/). Rewritten from dual bash/PowerShell into a single Python script.
 
+### Visual mode (default)
+
+![Visual mode](screenshot.png)
+
+### Minimal mode
+
+![Minimal mode](screenshot-minimal.png)
+
 ## What it shows
 
 | Segment | Minimal | Visual |
@@ -114,10 +122,3 @@ Usage API data is cached for 60 seconds in a platform-appropriate temp directory
 
 MIT
 
-## Original author
-
-Daniel Oliveira
-
-[![Website](https://img.shields.io/badge/Website-FF6B6B?style=for-the-badge&logo=safari&logoColor=white)](https://danielapoliveira.com/)
-[![X](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/daniel_not_nerd)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/daniel-ap-oliveira/)
