@@ -8,6 +8,8 @@ status line.  Two display modes:
   --mode visual    bars, pacing markers, conditional formatting (default)
 """
 
+from __future__ import annotations
+
 import argparse
 import io
 import json
