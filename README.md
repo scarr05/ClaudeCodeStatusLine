@@ -29,10 +29,12 @@ A cross-platform Python status line for [Claude Code](https://claude.com/claude-
 | Element | Green | Yellow | Orange | Red |
 |---------|-------|--------|--------|-----|
 | Context % (minimal) | <50% | >=50% | >=70% | >=90% |
-| Context bar (visual) | tok <100k | -- | tok 100-128k | tok >=128k |
+| Context bar (visual) | <30% | -- | >=30% | >=60% |
 | Usage % (5h/7d) | <50% | >=50% | >=70% | >=90% |
 | Effort level | high | -- | med | low (dim) |
 | Model name | Per-family: Opus=blue, Sonnet=orange, Haiku=purple, other=cyan |
+
+The visual context bar is proportional to the reported window size, so its thresholds hold on a 1M context model as well as the standard 200k one.
 
 ### Pacing markers
 

@@ -69,11 +69,19 @@ def usage_colour(pct: float) -> str:
     return GREEN
 
 
-def context_colour(tokens: int) -> str:
-    """RAG-style thresholds on absolute token count (for visual mode)."""
-    if tokens >= 128_000:
+def context_colour(tokens: int, size: int = 200_000) -> str:
+    """RAG-style thresholds on context fill ratio (for visual mode).
+
+    Green below 30% of the window, orange from 30%, red from 60%.  Expressed
+    as a ratio rather than an absolute token count so the thresholds hold at
+    any window size, from 200k up to 1M.  Integer arithmetic keeps the
+    boundaries exact rather than relying on float rounding.
+    """
+    if size <= 0:
+        size = 200_000
+    if tokens * 100 >= size * 60:
         return RED
-    if tokens >= 100_000:
+    if tokens * 100 >= size * 30:
         return ORANGE
     return GREEN
 
@@ -86,8 +94,14 @@ def effort_segment(level: str) -> str:
     return f"{GREEN}high{RESET}"
 
 
-def make_bar(pct: float, width: int = 10, target_pct: float | None = None) -> str:
-    """Render a progress bar with optional pacing marker."""
+def make_bar(pct: float, width: int = 10, target_pct: float | None = None,
+             colour: str | None = None) -> str:
+    """Render a progress bar with optional pacing marker.
+
+    `colour` overrides the default utilisation colouring, for bars that use
+    their own thresholds (the context bar) rather than the 50/70/90 usage
+    scale shared by the rate-limit bars.
+    """
     filled_char = "\u2593"  # ▓ dark shade
     empty_char = "\u2591"   # ░ light shade
     marker_char = "\u2502"  # │ thin vertical line
@@ -101,7 +115,8 @@ def make_bar(pct: float, width: int = 10, target_pct: float | None = None) -> st
         marker_pos = min(marker_pos, width - 1)
         bar[marker_pos] = marker_char
 
-    colour = usage_colour(pct)
+    if colour is None:
+        colour = usage_colour(pct)
     return f"{colour}{''.join(bar)}{RESET}"
 
 
@@ -431,8 +446,8 @@ def build_visual(data: dict) -> str:
               (usage.get("cache_creation_input_tokens") or 0) + \
               (usage.get("cache_read_input_tokens") or 0)
     pct = int(current * 100 / size) if size > 0 else 0
-    ctx_col = context_colour(current)
-    bar = make_bar(pct, width=10)
+    ctx_col = context_colour(current, size)
+    bar = make_bar(pct, width=10, colour=ctx_col)
     parts.append(
         f"{bar} {ctx_col}{pct}%{RESET} {WHITE}{format_tokens(current)}/{format_tokens(size)}{RESET}"
     )
